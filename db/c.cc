@@ -40,6 +40,7 @@
 #include "rocksdb/utilities/write_batch_with_index.h"
 #include "rocksdb/write_batch.h"
 #include "rocksdb/perf_context.h"
+#include "rocksdb/iostats_context.h"
 #include "utilities/merge_operators.h"
 
 #include <vector>
@@ -77,6 +78,7 @@ using ROCKSDB_NAMESPACE::FilterPolicy;
 using ROCKSDB_NAMESPACE::FlushOptions;
 using ROCKSDB_NAMESPACE::InfoLogLevel;
 using ROCKSDB_NAMESPACE::IngestExternalFileOptions;
+using ROCKSDB_NAMESPACE::IOStatsContext;
 using ROCKSDB_NAMESPACE::Iterator;
 using ROCKSDB_NAMESPACE::LiveFileMetaData;
 using ROCKSDB_NAMESPACE::Logger;
@@ -165,6 +167,7 @@ struct rocksdb_sstfilewriter_t   { SstFileWriter*    rep; };
 struct rocksdb_ratelimiter_t {
   std::shared_ptr<RateLimiter> rep;
 };
+struct rocksdb_iostatscontext_t     { IOStatsContext*      rep; };
 struct rocksdb_perfcontext_t     { PerfContext*      rep; };
 struct rocksdb_pinnableslice_t {
   PinnableSlice rep;
@@ -2945,6 +2948,25 @@ void rocksdb_options_set_row_cache(rocksdb_options_t* opt, rocksdb_cache_t* cach
 void rocksdb_set_perf_level(int v) {
   PerfLevel level = static_cast<PerfLevel>(v);
   SetPerfLevel(level);
+}
+
+rocksdb_iostatscontext_t* rocksdb_iostatscontext_create() {
+  rocksdb_iostatscontext_t* context = new rocksdb_iostatscontext_t;
+  context->rep = ROCKSDB_NAMESPACE::get_iostats_context();
+  return context;
+}
+
+void rocksdb_iostatscontext_reset(rocksdb_iostatscontext_t* context) {
+  context->rep->Reset();
+}
+
+char* rocksdb_iostatscontext_report(rocksdb_iostatscontext_t* context,
+    unsigned char exclude_zero_counters) {
+  return strdup(context->rep->ToString(exclude_zero_counters).c_str());
+}
+
+void rocksdb_iostatscontext_destroy(rocksdb_iostatscontext_t* context) {
+  delete context;
 }
 
 rocksdb_perfcontext_t* rocksdb_perfcontext_create() {

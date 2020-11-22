@@ -110,6 +110,7 @@ typedef struct rocksdb_envoptions_t      rocksdb_envoptions_t;
 typedef struct rocksdb_ingestexternalfileoptions_t rocksdb_ingestexternalfileoptions_t;
 typedef struct rocksdb_sstfilewriter_t   rocksdb_sstfilewriter_t;
 typedef struct rocksdb_ratelimiter_t     rocksdb_ratelimiter_t;
+typedef struct rocksdb_iostatscontext_t rocksdb_iostatscontext_t;
 typedef struct rocksdb_perfcontext_t     rocksdb_perfcontext_t;
 typedef struct rocksdb_pinnableslice_t rocksdb_pinnableslice_t;
 typedef struct rocksdb_transactiondb_options_t rocksdb_transactiondb_options_t;
@@ -1221,6 +1222,14 @@ enum {
   rocksdb_env_new_logger_nanos,
   rocksdb_total_metric_count = 68
 };
+
+extern ROCKSDB_LIBRARY_API rocksdb_iostatscontext_t* rocksdb_iostatscontext_create();
+extern ROCKSDB_LIBRARY_API void rocksdb_iostatscontext_reset(
+    rocksdb_iostatscontext_t* context);
+extern ROCKSDB_LIBRARY_API char* rocksdb_iostatscontext_report(
+    rocksdb_iostatscontext_t* context, unsigned char exclude_zero_counters);
+extern ROCKSDB_LIBRARY_API void rocksdb_iostatscontext_destroy(
+    rocksdb_iostatscontext_t* context);
 
 extern ROCKSDB_LIBRARY_API void rocksdb_set_perf_level(int);
 extern ROCKSDB_LIBRARY_API rocksdb_perfcontext_t* rocksdb_perfcontext_create();
